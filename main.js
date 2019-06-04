@@ -3,7 +3,7 @@ var context = canvas.getContext('2d')
 
 autoSetCanvasSize(canvas)
 
-listenToMouse(canvas)
+listenToUser(canvas)
 
 /***********/
 
@@ -33,9 +33,71 @@ function autoSetCanvasSize(canvas){
   }
 }
 
-function listenToMouse(canvas){
+function listenToUser(canvas){
   var using = false
   var lastPoint = {x:undefined,y:undefined}
+
+  if(document.body.ontouchstart !== undefined){
+    //触屏设备
+    canvas.ontouchstart = function(a){
+      var x = a.touches[0].clientX
+      var y = a.touches[0].clientY
+      using = true
+      if (usingEraser) {
+        context.clearRect(x - 5, y - 5, 10, 10)
+      } else {
+        lastPoint = { "x": x, "y": y }
+        drawCircle(x, y, 1)
+      }
+    }
+    canvas.ontouchmove = function(a){
+      var x = a.touches[0].clientX
+      var y = a.touches[0].clientY
+      if (!using) { return }
+      if (usingEraser) {
+        context.clearRect(x - 5, y - 5, 10, 10)
+      } else {
+        var newPoint = { "x": x, "y": y }
+        drawCircle(x, y, 1)
+        drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
+        lastPoint = newPoint
+      }
+    }
+    canvas.ontouchend = function(a){
+      using = false
+    }
+  }else{
+    //非触屏设备
+    canvas.onmousedown = function (a) {
+      var x = a.clientX
+      var y = a.clientY
+      using = true
+      if (usingEraser) {
+        context.clearRect(x - 5, y - 5, 10, 10)
+      } else {
+        lastPoint = { "x": x, "y": y }
+        drawCircle(x, y, 1)
+      }
+    }
+    canvas.onmousemove = function (a) {
+      var x = a.clientX
+      var y = a.clientY
+      if (!using) { return }
+      if (usingEraser) {
+        context.clearRect(x - 5, y - 5, 10, 10)
+      } else {
+        var newPoint = { "x": x, "y": y }
+        drawCircle(x, y, 1)
+        drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
+        lastPoint = newPoint
+      }
+    }
+    canvas.onmouseup = function (a) {
+      using = false
+    }
+  }
+ }
+
   function drawCircle(x,y,radius){
     context.fillStyle = 'white'
     context.beginPath()
@@ -52,34 +114,7 @@ function listenToMouse(canvas){
     context.closePath()
   }
 
-    canvas.onmousedown = function(a){
-    var x = a.clientX
-    var y = a.clientY 
-    using=true
-    if(usingEraser){
-      context.clearRect(x-5,y-5,10,10)
-    }else{
-      lastPoint = {"x":x,"y":y}
-      drawCircle(x,y,1)
-    }
-  }
-  canvas.onmousemove = function(a){
-      var x = a.clientX
-      var y = a.clientY
-      if(!using){return}
-      if(usingEraser){
-        context.clearRect(x-5,y-5,10,10)
-      }else{
-        var newPoint = {"x":x,"y":y}
-        drawCircle(x,y,1)   
-        drawLine(lastPoint.x,lastPoint.y,newPoint.x,newPoint.y)
-        lastPoint = newPoint
-       }
-  }
-  canvas.onmouseup = function(a){
-    using=false
-  }
-}
+
 
 
 
